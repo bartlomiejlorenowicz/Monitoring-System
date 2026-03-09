@@ -6,13 +6,13 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "security_events")
+@Table(name = "outbox_events")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SecurityEvent {
+public class OutboxEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,13 +23,14 @@ public class SecurityEvent {
     private EventType eventType;
 
     @Column(nullable = false)
-    private String userId;
+    private String topic;
 
-    private String ipAddress;
-
-    private String userAgent;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String payload;
 
     @Column(nullable = false)
-    private Instant timestamp;
+    private boolean published;
 
+    @Column(nullable = false)
+    private Instant createdAt;
 }
