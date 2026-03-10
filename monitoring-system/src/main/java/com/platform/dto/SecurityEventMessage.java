@@ -1,10 +1,16 @@
 package com.platform.dto;
 
 import com.platform.model.EventType;
+import lombok.Builder;
 
+import java.time.Instant;
+
+@Builder
 public record SecurityEventMessage(
-        EventType eventType,
+        String eventId,
         String userId,
         String ipAddress,
-        String userAgent
+        String userAgent,
+        EventType eventType,
+        Instant timestamp
 ) {}
