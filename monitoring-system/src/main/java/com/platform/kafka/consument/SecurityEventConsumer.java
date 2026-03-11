@@ -7,6 +7,7 @@ import com.platform.model.ProcessedEvent;
 import com.platform.repository.ProcessedEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,23 +26,24 @@ public class SecurityEventConsumer {
     @Transactional
     public void listen(String payload) throws JsonProcessingException {
 
-        SecurityEventMessage event =
-                objectMapper.readValue(payload, SecurityEventMessage.class);
+        try {
+            SecurityEventMessage event =
+                    objectMapper.readValue(payload, SecurityEventMessage.class);
 
-        if (processedEventRepository.existsById(event.eventId())) {
-            log.info("Skipping duplicate eventId={}", event.eventId());
-            return;
+            processedEventRepository.save(
+                    ProcessedEvent.builder()
+                            .eventId(event.eventId())
+                            .processedAt(Instant.now())
+                            .build()
+            );
+
+            log.info("Processing eventId={}, type={}", event.eventId(), event.eventType());
+
+        } catch (DataIntegrityViolationException e) {
+            log.info("Duplicate event detected");
+        } catch (Exception e) {
+            log.error("Failed to process event payload={}", payload, e);
+            throw e;
         }
-
-        log.info("Processing eventId={}, type={}", event.eventId(), event.eventType());
-
-        processedEventRepository.save(
-                ProcessedEvent.builder()
-                        .eventId(event.eventId())
-                        .processedAt(Instant.now())
-                        .build()
-        );
-
-        System.out.println("Received event: " + event);
     }
 }

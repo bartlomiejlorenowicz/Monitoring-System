@@ -9,12 +9,14 @@ import com.platform.model.SecurityEvent;
 import com.platform.repository.OutboxRepository;
 import com.platform.repository.SecurityEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SecurityEventService {
@@ -26,19 +28,19 @@ public class SecurityEventService {
     @Transactional
     public void saveEvent(SecurityEventMessage request) throws JsonProcessingException {
         String eventId = request.eventId() != null ? request.eventId() : UUID.randomUUID().toString();
+
+        if (outboxRepository.existsByEventId(eventId)) {
+            log.info("Duplicate event detected {}", eventId);
+            return;
+        }
+
         Instant now = Instant.now();
 
-        SecurityEvent securityEvent  = SecurityEvent.builder()
-                .eventType(request.eventType())
-                .userId(request.userId())
-                .ipAddress(request.ipAddress())
-                .userAgent(request.userAgent())
-                .timestamp(now)
-                .build();
+        SecurityEvent securityEvent  = mapToEntity(request, now);
 
         securityEventRepository.save(securityEvent);
 
-        SecurityEventMessage eventToPublish= new SecurityEventMessage(
+        SecurityEventMessage eventToPublish = new SecurityEventMessage(
                 eventId,
                 request.userId(),
                 request.ipAddress(),
@@ -60,14 +62,14 @@ public class SecurityEventService {
         outboxRepository.save(outboxEvent);
     }
 
-    public SecurityEvent mapToEntity(SecurityEventMessage request) {
+    private SecurityEvent mapToEntity(SecurityEventMessage request, Instant now) {
 
         return SecurityEvent.builder()
                 .eventType(request.eventType())
                 .userId(request.userId())
                 .ipAddress(request.ipAddress())
                 .userAgent(request.userAgent())
-                .timestamp(Instant.now())
+                .timestamp(now)
                 .build();
     }
 }

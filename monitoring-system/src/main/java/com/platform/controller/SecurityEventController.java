@@ -3,7 +3,9 @@ package com.platform.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.platform.dto.SecurityEventMessage;
 import com.platform.service.SecurityEventService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -14,7 +16,8 @@ public class SecurityEventController {
     private final SecurityEventService service;
 
     @PostMapping
-    public String sendEvent(@RequestBody SecurityEventMessage request) throws JsonProcessingException {
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public String sendEvent(@Valid @RequestBody SecurityEventMessage request) throws JsonProcessingException {
         service.saveEvent(request);
         return "Event accepted for processing";
     }

@@ -24,8 +24,7 @@ public class OutboxPublisher {
     @Scheduled(fixedDelay = 3000)
     @Transactional
     public void publishEvents() {
-        List<OutboxEvent> events =
-                outboxRepository.findTop10ByStatusOrderByCreatedAtAsc(OutboxStatus.NEW);
+        List<OutboxEvent> events = outboxRepository.findBatchForProcessing(OutboxStatus.NEW.name(), 10);
 
         for (OutboxEvent event : events) {
             try {
@@ -33,15 +32,16 @@ public class OutboxPublisher {
                 outboxRepository.save(event);
 
                 kafkaTemplate.send(
-                        event.getTopic(),
-                        event.getEventId(),
-                        event.getPayload()).get();
+                                event.getTopic(),
+                                event.getEventId(),
+                                event.getPayload())
+                        .get();
 
                 event.setStatus(OutboxStatus.PUBLISHED);
                 event.setPublishedAt(Instant.now());
                 event.setErrorMessage(null);
 
-                log.info("Published outbox event id={}", event.getId());
+                log.info("Published outbox event id={}, eventId={}", event.getId(), event.getEventId());
             } catch (Exception e) {
                 event.setStatus(OutboxStatus.FAILED);
                 event.setRetryCount(event.getRetryCount() + 1);
