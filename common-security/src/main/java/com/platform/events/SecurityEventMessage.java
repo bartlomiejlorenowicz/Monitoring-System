@@ -1,13 +1,10 @@
-package com.platform.dto;
+package com.platform.events;
 
-import com.platform.model.EventType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 
 import java.time.Instant;
 
-@Builder
 public record SecurityEventMessage(
         String eventId,
 
