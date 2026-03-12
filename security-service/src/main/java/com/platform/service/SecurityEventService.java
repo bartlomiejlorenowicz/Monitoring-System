@@ -2,7 +2,7 @@ package com.platform.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.platform.dto.SecurityEventMessage;
+import com.platform.events.SecurityEventMessage;
 import com.platform.model.OutboxEvent;
 import com.platform.model.OutboxStatus;
 import com.platform.model.SecurityEvent;

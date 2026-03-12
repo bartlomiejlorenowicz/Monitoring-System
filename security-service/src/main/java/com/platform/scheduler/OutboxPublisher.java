@@ -29,6 +29,7 @@ public class OutboxPublisher {
         for (OutboxEvent event : events) {
             try {
                 event.setStatus(OutboxStatus.PROCESSING);
+                event.setProcessingStartedAt(Instant.now());
                 outboxRepository.save(event);
 
                 kafkaTemplate.send(
@@ -40,11 +41,14 @@ public class OutboxPublisher {
                 event.setStatus(OutboxStatus.PUBLISHED);
                 event.setPublishedAt(Instant.now());
                 event.setErrorMessage(null);
+                event.setProcessingStartedAt(null);
 
                 log.info("Published outbox event id={}, eventId={}", event.getId(), event.getEventId());
             } catch (Exception e) {
                 event.setStatus(OutboxStatus.FAILED);
-                event.setRetryCount(event.getRetryCount() + 1);
+                event.setRetryCount(
+                        event.getRetryCount() == null ? 1 : event.getRetryCount() + 1
+                );
                 event.setErrorMessage(truncate(e.getMessage(), 500));
                 outboxRepository.save(event);
 
@@ -61,6 +65,7 @@ public class OutboxPublisher {
         for (OutboxEvent event : failedEvents) {
             if (event.getRetryCount() < 5) {
                 event.setStatus(OutboxStatus.NEW);
+                outboxRepository.save(event);
             }
         }
     }
@@ -71,4 +76,16 @@ public class OutboxPublisher {
         }
         return value.length() <= max ? value : value.substring(0, max);
     }
+
+    @Scheduled(fixedDelay = 60000)
+    @Transactional
+    public void recoverStuckEvents() {
+
+        int recovered = outboxRepository.recoverStuckEvents();
+
+        if (recovered > 0) {
+            log.warn("Recovered {} stuck outbox events", recovered);
+        }
+    }
+
 }

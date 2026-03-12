@@ -1,7 +1,7 @@
 package com.platform.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.platform.dto.SecurityEventMessage;
+import com.platform.events.SecurityEventMessage;
 import com.platform.service.SecurityEventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

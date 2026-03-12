@@ -2,7 +2,7 @@ package com.platform.kafka.consument;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.platform.dto.SecurityEventMessage;
+import com.platform.events.SecurityEventMessage;
 import com.platform.model.ProcessedEvent;
 import com.platform.repository.ProcessedEventRepository;
 import lombok.RequiredArgsConstructor;

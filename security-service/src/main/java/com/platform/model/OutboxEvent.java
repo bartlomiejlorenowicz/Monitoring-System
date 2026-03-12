@@ -1,5 +1,6 @@
 package com.platform.model;
 
+import com.platform.events.EventType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,6 +45,9 @@ public class OutboxEvent {
     private Integer retryCount;
 
     private String errorMessage;
+
+    @Column(name = "processing_started_at")
+    private Instant processingStartedAt;
 
     @Version
     private Long version;

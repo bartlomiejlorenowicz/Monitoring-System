@@ -1,5 +1,6 @@
 package com.platform.model;
 
+import com.platform.events.EventType;
 import jakarta.persistence.*;
 import lombok.*;
 
