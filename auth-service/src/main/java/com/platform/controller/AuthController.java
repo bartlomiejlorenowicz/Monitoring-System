@@ -1,8 +1,11 @@
 package com.platform.controller;
 
 import com.platform.dto.request.LoginRequest;
+import com.platform.dto.request.RegistrationRequest;
+import com.platform.dto.response.RegistrationResponse;
 import com.platform.dto.response.TokenResponse;
 import com.platform.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,6 +23,11 @@ public class AuthController {
     @PostMapping("/login")
     public TokenResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/register")
+    public RegistrationResponse register(@Valid @RequestBody RegistrationRequest request) {
+        return authService.register(request);
     }
 
     @GetMapping("/secure")

@@ -7,5 +7,6 @@ public enum EventType {
     LOGOUT,
     PASSWORD_CHANGED,
     ACCOUNT_LOCKED,
+    USER_REGISTERED,
     SECURITY_EVENT
 }
